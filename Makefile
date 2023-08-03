@@ -40,17 +40,17 @@ build:
 	make --directory=aw-watcher-afk build
 	make --directory=aw-watcher-window build
 	make --directory=aw-server build SKIP_WEBUI=$(SKIP_WEBUI)
-ifeq ($(SKIP_SERVER_RUST),true)  # Skip building aw-server-rust if SKIP_SERVER_RUST is true
-	@echo "Skipping aw-server-rust build"
-else
-	@echo 'Looking for rust...'
-	@if (which cargo); then \
-		echo 'Rust found!'; \
-		make --directory=aw-server-rust build SKIP_WEBUI=$(SKIP_WEBUI); \
-	else \
-		echo 'Rust not found, skipping aw-server-rust!'; \
-	fi
-endif
+#ifeq ($(SKIP_SERVER_RUST),true)  # Skip building aw-server-rust if SKIP_SERVER_RUST is true
+#	@echo "Skipping aw-server-rust build"
+#else
+#	@echo 'Looking for rust...'
+#	@if (which cargo); then \
+#		echo 'Rust found!'; \
+#		make --directory=aw-server-rust build SKIP_WEBUI=$(SKIP_WEBUI); \
+#	else \
+#		echo 'Rust not found, skipping aw-server-rust!'; \
+#	fi
+#endif
 	make --directory=aw-qt build
 #   The below is needed due to: https://github.com/ActivityWatch/activitywatch/issues/173
 	make --directory=aw-client build
@@ -160,13 +160,13 @@ package:
 #
 	make --directory=aw-server package
 	cp -r aw-server/dist/aw-server dist/activitywatch
-ifeq ($(SKIP_SERVER_RUST),true)
-	@echo "Skipping aw-server-rust package"
-else
-	make --directory=aw-server-rust package
-	mkdir -p dist/activitywatch/aw-server-rust
-	cp -r aw-server-rust/target/package/* dist/activitywatch/aw-server-rust
-endif
+#ifeq ($(SKIP_SERVER_RUST),true)
+#	@echo "Skipping aw-server-rust package"
+#else
+#	make --directory=aw-server-rust package
+#	mkdir -p dist/activitywatch/aw-server-rust
+#	cp -r aw-server-rust/target/package/* dist/activitywatch/aw-server-rust
+#endif
 	make --directory=aw-qt package
 	cp -r aw-qt/dist/aw-qt/. dist/activitywatch
 # Remove problem-causing binaries
