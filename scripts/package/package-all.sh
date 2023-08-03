@@ -62,7 +62,7 @@ function build_setup() {
     filename="activitywatch-${version}-${platform}-${arch}-setup.exe"
     echo "Name of package will be: $filename"
 
-    innosetupdir="/c/Program Files (x86)/Inno Setup 6"
+    innosetupdir="/mnt/c/Program Files (x86)/Inno Setup 6/"
     if [ ! -d "$innosetupdir" ]; then
         echo "ERROR: Couldn't find innosetup which is needed to build the installer. We suggest you install it using chocolatey. Exiting."
         exit 1
@@ -76,9 +76,10 @@ function build_setup() {
 }
 
 build_zip
-if [[ $platform == "windows"* ]]; then
-    build_setup
-fi
+# if [[ $platform == "windows"* ]]; then
+#     build_setup
+# fi
+build_setup
 
 echo
 echo "-------------------------------------"
