@@ -1,6 +1,3 @@
-# -*- mode: python -*-
-# vi: set ft=python :
-
 import os
 import platform
 import subprocess
@@ -27,13 +24,9 @@ if not codesign_identity:
 aw_core_path = Path(os.path.dirname(aw_core.__file__))
 restx_path = Path(os.path.dirname(flask_restx.__file__))
 
-aws_location = Path("aw-server")
-aw_server_rust_location = Path("aw-server-rust")
-aw_server_rust_bin = aw_server_rust_location / "target/package/aw-server-rust"
-aw_server_rust_webui = aw_server_rust_location / "target/package/static"
 aw_qt_location = Path("aw-qt")
-awa_location = Path("aw-watcher-afk")
 aww_location = Path("aw-watcher-window")
+awa_location = Path("aw-watcher-afk")
 
 if platform.system() == "Darwin":
     icon = aw_qt_location / "media/logo/logo.icns"
@@ -44,46 +37,21 @@ block_cipher = None
 extra_pathex = []
 if platform.system() == "Windows":
     # The Windows version includes paths to Qt binaries which are
-    # not automatically found due to bug in PyInstaller 3.2.
+    # not automatically found due to a bug in PyInstaller 3.2.
     # See: https://github.com/pyinstaller/pyinstaller/issues/2152
     import PyQt5
 
     pyqt_path = os.path.dirname(PyQt5.__file__)
     extra_pathex.append(pyqt_path + "\\Qt\\bin")
 
-skip_rust = False
-if not aw_server_rust_bin.exists():
-    skip_rust = True
-    print("Skipping Rust build because aw-server-rust binary not found.")
-
-aw_server_a = Analysis(
-    ["aw-server/__main__.py"],
-    pathex=[],
-    binaries=None,
-    datas=[
-        (aws_location / "aw_server/static", "aw_server/static"),
-        (restx_path / "templates", "flask_restx/templates"),
-        (restx_path / "static", "flask_restx/static"),
-        (aw_core_path / "schemas", "aw_core/schemas"),
-    ],
-    hiddenimports=[],
-    hookspath=[],
-    runtime_hooks=[],
-    excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
-)
-
 aw_qt_a = Analysis(
     [aw_qt_location / "aw_qt/__main__.py"],
     pathex=[] + extra_pathex,
-    binaries=[(aw_server_rust_bin, ".")] if not skip_rust else [],
+    binaries=None,
     datas=[
         (aw_qt_location / "resources/aw-qt.desktop", "aw_qt/resources"),
         (aw_qt_location / "media", "aw_qt/media"),
-    ]
-    + ([(aw_server_rust_webui, "aw_server_rust/static")] if not skip_rust else []),
+    ],
     hiddenimports=[],
     hookspath=[],
     runtime_hooks=[],
@@ -151,11 +119,34 @@ aw_watcher_window_a = Analysis(
     cipher=block_cipher,
 )
 
+aw_watcher_window_a = Analysis(
+    [aww_location / "aw_watcher_window/__main__.py"],
+    pathex=[],
+    binaries=[
+        (
+            aww_location / "aw_watcher_window/aw-watcher-window-macos",
+            "aw_watcher_window",
+        )
+    ]
+    if platform.system() == "Darwin"
+    else [],
+    datas=[
+        (aww_location / "aw_watcher_window/printAppStatus.jxa", "aw_watcher_window")
+    ],
+    hiddenimports=[],
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+)
+
 # https://pythonhosted.org/PyInstaller/spec-files.html#multipackage-bundles
 # MERGE takes a bit weird arguments, it wants tuples which consists of
 # the analysis paired with the script name and the bin name
 MERGE(
-    (aw_server_a, "aw-server", "aw-server"),
+    
     (aw_qt_a, "aw-qt", "aw-qt"),
     (aw_watcher_afk_a, "aw-watcher-afk", "aw-watcher-afk"),
     (aw_watcher_window_a, "aw-watcher-window", "aw-watcher-window"),
@@ -209,29 +200,6 @@ awa_coll = COLLECT(
     name="aw-watcher-afk",
 )
 
-aws_pyz = PYZ(aw_server_a.pure, aw_server_a.zipped_data, cipher=block_cipher)
-
-aws_exe = EXE(
-    aws_pyz,
-    aw_server_a.scripts,
-    exclude_binaries=True,
-    name="aw-server",
-    debug=False,
-    strip=False,
-    upx=True,
-    console=True,
-    entitlements_file=entitlements_file,
-    codesign_identity=codesign_identity,
-)
-aws_coll = COLLECT(
-    aws_exe,
-    aw_server_a.binaries,
-    aw_server_a.zipfiles,
-    aw_server_a.datas,
-    strip=False,
-    upx=True,
-    name="aw-server",
-)
 
 awq_pyz = PYZ(aw_qt_a.pure, aw_qt_a.zipped_data, cipher=block_cipher)
 awq_exe = EXE(
@@ -262,7 +230,7 @@ if platform.system() == "Darwin":
         awq_coll,
         aww_coll,
         awa_coll,
-        aws_coll,
+      
         name="ActivityWatch.app",
         icon=icon,
         bundle_identifier="net.activitywatch.ActivityWatch",

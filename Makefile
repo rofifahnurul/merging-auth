@@ -158,8 +158,8 @@ package:
 	make --directory=aw-watcher-window package
 	cp -r aw-watcher-window/dist/aw-watcher-window dist/activitywatch
 #
-	make --directory=aw-server package
-	cp -r aw-server/dist/aw-server dist/activitywatch
+#	make --directory=aw-server package
+#	cp -r aw-server/dist/aw-server dist/activitywatch
 #ifeq ($(SKIP_SERVER_RUST),true)
 #	@echo "Skipping aw-server-rust package"
 #else
